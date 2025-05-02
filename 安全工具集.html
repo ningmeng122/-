@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全工具集 v1.0.1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .version {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ecf0f1;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tool-content {
+            display: none;
+        }
+        .tool-content.active {
+            display: block;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        input[type="range"], input[type="url"], input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .length-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .checkbox-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .checkbox-item {
+            margin: 5px 15px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .password-display, .url-result, .security-report {
+            margin: 20px 0 10px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            font-size: 18px;
+            word-break: break-all;
+            text-align: left;
+        }
+        .copy-btn {
+            background-color: #2ecc71;
+        }
+        .copy-btn:hover {
+            background-color: #27ae60;
+        }
+        .danger-btn {
+            background-color: #e74c3c;
+        }
+        .danger-btn:hover {
+            background-color: #c0392b;
+        }
+        .strength-meter {
+            height: 5px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        .strength-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .weak {
+            color: #e74c3c;
+        }
+        .medium {
+            color: #f39c12;
+        }
+        .strong {
+            color: #3498db;
+        }
+        .very-strong {
+            color: #2ecc71;
+        }
+        .weak-bg {
+            background-color: #e74c3c;
+        }
+        .medium-bg {
+            background-color: #f39c12;
+        }
+        .strong-bg {
+            background-color: #3498db;
+        }
+        .very-strong-bg {
+            background-color: #2ecc71;
+        }
+        .instructions {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin: 10px 0;
+            text-align: left;
+        }
+        .security-item {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .security-item:before {
+            content: "•";
+            position: absolute;
+            left: 5px;
+        }
+        .good {
+            color: #2ecc71;
+        }
+        .bad {
+            color: #e74c3c;
+        }
+        .warning {
+            color: #f39c12;
+        }
+        .info {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>安全工具集</h1>
+        <div class="version">版本号: v1.0.1</div>
+        
+        <div class="tab-container">
+            <button class="tab active" data-tab="password-generator">密码生成器</button>
+            <button class="tab" data-tab="password-checker">密码安全检查</button>
+            <button class="tab" data-tab="url-redirect">网址跳转检查</button>
+        </div>
+        
+        <!-- 密码生成器 -->
+        <div class="tool-content active" id="password-generator">
+            <div class="controls">
+                <label for="length">密码长度: <span class="length-value" id="length-value">12</span></label>
+                <input type="range" id="length" min="6" max="32" value="12">
+            </div>
+            
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="uppercase" checked>
+                    <label for="uppercase">大写字母 (A-Z)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="lowercase" checked>
+                    <label for="lowercase">小写字母 (a-z)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="numbers" checked>
+                    <label for="numbers">数字 (0-9)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="symbols" checked>
+                    <label for="symbols">特殊符号 (!@#$%)</label>
+                </div>
+            </div>
+            
+            <button id="generate">生成密码</button>
+            
+            <div class="password-display" id="password"></div>
+            
+            <div class="strength-meter">
+                <div class="strength-bar" id="strength-bar"></div>
+            </div>
+            <div class="strength-text" id="strength-text">密码强度: 未评估</div>
+            
+            <button id="copy-password" class="copy-btn">复制密码</button>
+        </div>
+        
+        <!-- 密码安全检查 -->
+        <div class="tool-content" id="password-checker">
+            <div class="instructions">
+                <p>输入您的密码进行安全检查（所有检查仅在本地完成，不会上传任何数据）：</p>
+            </div>
+            
+            <input type="password" id="password-to-check" placeholder="输入要检查的密码">
+            <button id="check-password">检查密码</button>
+            
+            <div class="security-report" id="security-report" style="display:none;">
+                <h3>安全报告</h3>
+                <div id="report-content"></div>
+            </div>
+        </div>
+        
+        <!-- 网址跳转检查 -->
+        <div class="tool-content" id="url-redirect">
+            <div class="instructions">
+                <p>输入可疑的短链接或重定向链接，检查其真实目标网址：</p>
+                <p>注意：此工具仅显示目标网址，不会实际访问该链接。</p>
+            </div>
+            
+            <input type="url" id="input-url" placeholder="输入要检查的网址 (例如: https://bit.ly/xxx)" required>
+            <button id="check-url">检查网址</button>
+            
+            <div class="url-result" id="url-result"></div>
+            
+            <button id="copy-url" class="copy-btn" style="display:none;">复制网址</button>
+            <button id="visit-url" class="danger-btn" style="display:none;">访问此网址 (风险自担)</button>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有标签页和内容的active类
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tool-content').forEach(c => c.classList.remove('active'));
+                
+                // 为当前点击的标签页和对应内容添加active类
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // 清空密码检查器的输入和报告
+                if (tabId === 'password-checker') {
+                    document.getElementById('password-to-check').value = '';
+                    document.getElementById('security-report').style.display = 'none';
+                }
+            });
+        });
+
+        // 密码生成器功能
+        document.getElementById('length').addEventListener('input', function() {
+            document.getElementById('length-value').textContent = this.value;
+        });
+
+        // 统一的密码强度评估函数
+        function evaluatePasswordStrength(password) {
+            if (!password || password.length === 0) return 0;
+            
+            let score = 0;
+            
+            // 长度评分 (0-4分)
+            score += Math.min(Math.floor(password.length / 3), 4);
+            
+            // 字符种类评分 (0-3分)
+            const hasLowercase = /[a-z]/.test(password);
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasNumbers = /[0-9]/.test(password);
+            const hasSymbols = /[^a-zA-Z0-9]/.test(password);
+            
+            const charTypes = [hasLowercase, hasUppercase, hasNumbers, hasSymbols].filter(Boolean).length;
+            score += Math.min(charTypes - 1, 3);
+            
+            // 额外加分项 (0-3分)
+            if (password.length >= 12 && charTypes >= 3) score += 1;
+            if (password.length >= 16 && charTypes >= 3) score += 1;
+            if (password.length >= 20 && charTypes >= 3) score += 1;
+            
+            // 减分项
+            if (checkCommonPassword(password)) score = Math.max(score - 3, 0);
+            if (checkSequences(password)) score = Math.max(score - 1, 0);
+            if (checkRepeats(password)) score = Math.max(score - 1, 0);
+            
+            // 确保分数在0-10之间
+            return Math.min(Math.max(score, 0), 10);
+        }
+
+        function updateStrengthDisplay(score) {
+            const strengthBar = document.getElementById('strength-bar');
+            const strengthText = document.getElementById('strength-text');
+            
+            let strength, width, colorClass, text;
+            
+            if (score <= 3) {
+                strength = 'weak';
+                width = '30%';
+                colorClass = 'weak';
+                text = '弱';
+            } else if (score <= 6) {
+                strength = 'medium';
+                width = '60%';
+                colorClass = 'medium';
+                text = '中等';
+            } else if (score <= 8) {
+                strength = 'strong';
+                width = '80%';
+                colorClass = 'strong';
+                text = '强';
+            } else {
+                strength = 'very-strong';
+                width = '100%';
+                colorClass = 'very-strong';
+                text = '非常强';
+            }
+            
+            strengthBar.className = 'strength-bar ' + strength + '-bg';
+            strengthBar.style.width = width;
+            strengthText.className = 'strength-text ' + colorClass;
+            strengthText.textContent = `密码强度: ${text} (${score}/10)`;
+        }
+
+        document.getElementById('generate').addEventListener('click', function() {
+            const length = parseInt(document.getElementById('length').value);
+            const uppercase = document.getElementById('uppercase').checked;
+            const lowercase = document.getElementById('lowercase').checked;
+            const numbers = document.getElementById('numbers').checked;
+            const symbols = document.getElementById('symbols').checked;
+            
+            let chars = '';
+            if (uppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (lowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+            if (numbers) chars += '0123456789';
+            if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            
+            if (!chars) {
+                alert('请至少选择一种字符类型！');
+                return;
+            }
+            
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            document.getElementById('password').textContent = password;
+            
+            // 评估密码强度
+            const strengthScore = evaluatePasswordStrength(password);
+            updateStrengthDisplay(strengthScore);
+        });
+
+        document.getElementById('copy-password').addEventListener('click', function() {
+            const password = document.getElementById('password').textContent;
+            if (!password) {
+                alert('请先生成密码！');
+                return;
+            }
+            
+            navigator.clipboard.writeText(password).then(function() {
+                alert('密码已复制到剪贴板！');
+            }, function() {
+                alert('复制失败，请手动选择密码并复制。');
+            });
+        });
+
+        // 密码安全检查功能
+        document.getElementById('check-password').addEventListener('click', function() {
+            const password = document.getElementById('password-to-check').value;
+            
+            if (!password) {
+                alert('请输入要检查的密码！');
+                return;
+            }
+            
+            // 所有检查都在本地完成，不会上传任何数据
+            const report = checkPasswordSecurity(password);
+            displaySecurityReport(report);
+        });
+
+        function checkPasswordSecurity(password) {
+            const report = {
+                length: password.length,
+                hasLowercase: /[a-z]/.test(password),
+                hasUppercase: /[A-Z]/.test(password),
+                hasNumbers: /[0-9]/.test(password),
+                hasSymbols: /[^a-zA-Z0-9]/.test(password),
+                isCommon: checkCommonPassword(password),
+                hasSequences: checkSequences(password),
+                hasRepeats: checkRepeats(password),
+                entropy: calculateEntropy(password),
+                strengthScore: evaluatePasswordStrength(password)
+            };
+            
+            return report;
+        }
+
+        // 检查是否是常见密码（本地列表）
+        function checkCommonPassword(password) {
+            // 仅包含少量常见密码示例（实际应用中可以扩展这个列表）
+            const commonPasswords = [
+                '123456', 'password', '12345678', '123456789', '12345',
+                '1234567', 'qwerty', 'abc123', 'admin', 'welcome',
+                '111111', '123123', 'password1', '1234567890', 'letmein'
+            ];
+            
+            return commonPasswords.includes(password.toLowerCase());
+        }
+
+        // 检查连续字符
+        function checkSequences(password) {
+            const sequences = [
+                '123', '234', '345', '456', '567', '678', '789', '890',
+                'abc', 'bcd', 'cde', 'def', 'efg', 'fgh', 'ghi', 'hij', 'ijk', 'jkl', 'klm', 'lmn', 'mno', 'nop', 'opq', 'pqr', 'qrs', 'rst', 'stu', 'tuv', 'uvw', 'vwx', 'wxy', 'xyz',
+                'qwe', 'wer', 'ert', 'rty', 'tyu', 'yui', 'uio', 'iop',
+                'asd', 'sdf', 'dfg', 'fgh', 'ghj', 'hjk', 'jkl',
+                'zxc', 'xcv', 'cvb', 'vbn', 'bnm'
+            ];
+            
+            const lowerPassword = password.toLowerCase();
+            return sequences.some(seq => lowerPassword.includes(seq));
+        }
+
+        // 检查重复字符
+        function checkRepeats(password) {
+            return /(.)\1{2,}/.test(password); // 连续3个或以上相同字符
+        }
+
+        // 计算密码熵（比特）
+        function calculateEntropy(password) {
+            let poolSize = 0;
+            
+            if (/[a-z]/.test(password)) poolSize += 26;
+            if (/[A-Z]/.test(password)) poolSize += 26;
+            if (/[0-9]/.test(password)) poolSize += 10;
+            if (/[^a-zA-Z0-9]/.test(password)) poolSize += 32; // 假设32个特殊字符
+            
+            if (poolSize === 0) return 0;
+            
+            return Math.log2(Math.pow(poolSize, password.length));
+        }
+
+        function displaySecurityReport(report) {
+            const reportContent = document.getElementById('report-content');
+            reportContent.innerHTML = '';
+            
+            // 使用统一的评分标准
+            const strengthText = 
+                report.strengthScore <= 3 ? '极弱' :
+                report.strengthScore <= 6 ? '弱' :
+                report.strengthScore <= 8 ? '强' : '非常强';
+            
+            const strengthClass = 
+                report.strengthScore <= 3 ? 'bad' :
+                report.strengthScore <= 6 ? 'warning' :
+                report.strengthScore <= 8 ? 'good' : 'very-strong';
+
+            // 长度评估
+            const lengthItem = document.createElement('div');
+            lengthItem.className = 'security-item';
+            lengthItem.innerHTML = `密码长度: ${report.length} 字符 - 
+                <span class="${report.length >= 12 ? 'good' : report.length >= 8 ? 'warning' : 'bad'}">
+                ${report.length >= 12 ? '优秀' : report.length >= 8 ? '一般' : '不足'}
+                </span>`;
+            reportContent.appendChild(lengthItem);
+            
+            // 字符种类
+            const charTypes = [
+                report.hasLowercase ? '小写字母' : null,
+                report.hasUppercase ? '大写字母' : null,
+                report.hasNumbers ? '数字' : null,
+                report.hasSymbols ? '特殊符号' : null
+            ].filter(Boolean);
+            
+            const charTypesItem = document.createElement('div');
+            charTypesItem.className = 'security-item';
+            charTypesItem.innerHTML = `包含字符类型: ${charTypes.join(', ') || '无'} - 
+                <span class="${charTypes.length >= 4 ? 'good' : charTypes.length >= 3 ? 'warning' : 'bad'}">
+                ${charTypes.length >= 4 ? '优秀' : charTypes.length >= 3 ? '一般' : '不足'}
+                </span>`;
+            reportContent.appendChild(charTypesItem);
+            
+            // 常见密码检查
+            if (report.isCommon) {
+                const commonItem = document.createElement('div');
+                commonItem.className = 'security-item bad';
+                commonItem.textContent = '警告: 这是一个常见密码，容易被破解';
+                reportContent.appendChild(commonItem);
+            }
+            
+            // 连续字符检查
+            if (report.hasSequences) {
+                const sequenceItem = document.createElement('div');
+                sequenceItem.className = 'security-item warning';
+                sequenceItem.textContent = '注意: 密码中包含连续字符序列';
+                reportContent.appendChild(sequenceItem);
+            }
+            
+            // 重复字符检查
+            if (report.hasRepeats) {
+                const repeatItem = document.createElement('div');
+                repeatItem.className = 'security-item warning';
+                repeatItem.textContent = '注意: 密码中包含重复字符';
+                reportContent.appendChild(repeatItem);
+            }
+            
+            // 熵值评估
+            const entropyItem = document.createElement('div');
+            entropyItem.className = 'security-item';
+            entropyItem.innerHTML = `密码熵值: ${report.entropy.toFixed(1)} 比特 - 
+                <span class="${report.entropy > 60 ? 'good' : report.entropy > 40 ? 'warning' : 'bad'}">
+                ${report.entropy > 60 ? '非常安全' : report.entropy > 40 ? '中等安全' : '不够安全'}
+                </span>`;
+            reportContent.appendChild(entropyItem);
+            
+            // 改进建议
+            const suggestions = [];
+            
+            if (report.length < 8) {
+                suggestions.push("增加密码长度（建议至少12个字符）");
+            }
+            
+            if (charTypes.length < 3) {
+                suggestions.push("使用更多种类的字符（大小写字母、数字、符号的组合）");
+            }
+            
+            if (report.isCommon) {
+                suggestions.push("避免使用常见密码或字典中的单词");
+            }
+            
+            if (report.hasSequences || report.hasRepeats) {
+                suggestions.push("避免使用连续或重复的字符模式");
+            }
+            
+            if (suggestions.length > 0) {
+                const suggestionsItem = document.createElement('div');
+                suggestionsItem.className = 'security-item info';
+                suggestionsItem.innerHTML = `<strong>改进建议:</strong><br>${suggestions.map(s => `• ${s}`).join('<br>')}`;
+                reportContent.appendChild(suggestionsItem);
+            }
+            
+            // 总体评估
+            const overallItem = document.createElement('div');
+            overallItem.className = 'security-item';
+            overallItem.style.marginTop = '15px';
+            overallItem.style.fontWeight = 'bold';
+            overallItem.style.fontSize = '1.1em';
+            overallItem.innerHTML = `总体评估: 
+                <span class="${strengthClass}">
+                ${strengthText} (${report.strengthScore}/10)
+                </span>`;
+            reportContent.appendChild(overallItem);
+            
+            // 显示报告
+            document.getElementById('security-report').style.display = 'block';
+        }
+
+        // 网址跳转检查功能
+        document.getElementById('check-url').addEventListener('click', function() {
+            const inputUrl = document.getElementById('input-url').value.trim();
+            
+            if (!inputUrl) {
+                alert('请输入要检查的网址！');
+                return;
+            }
+            
+            // 验证URL格式
+            try {
+                new URL(inputUrl);
+            } catch (e) {
+                alert('请输入有效的网址格式（例如: https://example.com）');
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('url-result').textContent = '正在检查网址...';
+            document.getElementById('copy-url').style.display = 'none';
+            document.getElementById('visit-url').style.display = 'none';
+            
+            // 使用CORS代理来避免跨域问题
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(inputUrl);
+            
+            fetch(proxyUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('网络响应不正常');
+                    return response.json();
+                })
+                .then(data => {
+                    // 解析最终URL（处理重定向）
+                    let finalUrl = inputUrl;
+                    
+                    // 如果API返回了实际获取的URL（有些代理会返回）
+                    if (data.url) {
+                        finalUrl = data.url;
+                    }
+                    
+                    // 显示结果
+                    document.getElementById('url-result').textContent = `最终目标网址:\n${finalUrl}`;
+                    document.getElementById('copy-url').style.display = 'inline-block';
+                    document.getElementById('visit-url').style.display = 'inline-block';
+                    
+                    // 存储最终URL以便后续操作
+                    document.getElementById('visit-url').dataset.url = finalUrl;
+                })
+                .catch(error => {
+                    console.error('检查网址时出错:', error);
+                    document.getElementById('url-result').textContent = '无法检查此网址: ' + error.message;
+                });
+        });
+
+        document.getElementById('copy-url').addEventListener('click', function() {
+            const resultText = document.getElementById('url-result').textContent;
+            const finalUrl = resultText.replace('最终目标网址:\n', '');
+            
+            navigator.clipboard.writeText(finalUrl).then(function() {
+                alert('网址已复制到剪贴板！');
+            }, function() {
+                alert('复制失败，请手动选择网址并复制。');
+            });
+        });
+
+        document.getElementById('visit-url').addEventListener('click', function() {
+            const finalUrl = this.dataset.url;
+            if (finalUrl) {
+                const confirmVisit = confirm(`警告: 您即将访问外部网址\n${finalUrl}\n\n请确认此网址可信！\n\n是否继续？`);
+                if (confirmVisit) {
+                    window.open(finalUrl, '_blank');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
